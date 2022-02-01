@@ -43,16 +43,17 @@ def get_required_ncut(ej, ec, ng, levels_count, desired_accuracy_threshold=1e-06
 
 
 
-#new_reference_array fills an empty np array with NaN and replaces each in a for loop with the appropriate eigenvals
+#new_approx_array fills an empty np array with NaN and replaces each in a for loop with the appropriate eigenvals
 # for each ncut
 #then must use those reference eigenvals in each element to have accuracy values (error) for each approximation
 #then must find each element that is below the desired accuracy threshold and put them into an array
-def new_reference_array(tmon, m):
-    storage_array = np.empty(shape=(m,2*m+1))
+def new_approx_array(tmon, max_ncut):
+    storage_array = np.empty(shape=(max_ncut,2*max_ncut+1))
     storage_array[:] = np.NaN
-    for row_index, my_ncut in enumerate(range(1,m+1)):
+    ref = tmon.eigenvals(evals_count= max_ncut)
+    for row_index, my_ncut in enumerate(range(1,max_ncut+1)):
         tmon.ncut = my_ncut
-        storage_array[row_index, 0:2*my_ncut+1] = tmon.eignvals(evals_count = 2*my_ncut+1)
+        storage_array[row_index, 0:2*my_ncut+1] = tmon.eigenvals(evals_count = 2*my_ncut+1)
 
     return storage_array
 
