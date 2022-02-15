@@ -7,18 +7,27 @@ import scqubits as scq
 # for each ncut
 #then must use those reference eigenvals in each element to have accuracy values (error) for each approximation
 #then must find each element that is below the desired accuracy threshold and put them into an array
-def get_accuracy_values(tmon, max_ncut, levels_count):
-    min_ncut = levels_count/2 -1
+def get_accuracy_values(tmon, max_ncut, levels_count, desired_accuracy_threshold = 1e-06):
+    min_ncut= int(levels_count/2 -1)
     storage_array = np.empty(shape=(max_ncut,2*max_ncut+1))
     storage_array[:] = np.NaN
     ref = tmon.eigenvals(evals_count= 2*max_ncut+1)
     accuracy_values = np.zeros_like(storage_array)
-    for row_index, my_ncut in enumerate(range(1,max_ncut+1)):
+    for row_index, my_ncut in enumerate(range(min_ncut,max_ncut)):
         tmon.ncut = my_ncut
         approx_value = tmon.eigenvals(evals_count=2 * my_ncut + 1)
         storage_array[row_index, 0:2*my_ncut+1] = approx_value
-        relative_deviation_table = (approx_value-ref[2*my_ncut+1])/ref[2*my_ncut+1]
-        accuracy_values[row_index, :] = np.abs(relative_deviation_table)
+        relative_deviation_table = (approx_value-ref[0:2*my_ncut+1]) / ref[0:2*my_ncut+1]
+
+        accuracy_values[row_index, 0:2*my_ncut+1] = np.abs(relative_deviation_table)
+        threshold_array = np.ones(levels_count)*desired_accuracy_threshold
+        if (accuracy_values[row_index, 0:levels_count-1] < threshold_array[0:levels_count-1]).all():
+            return my_ncut
+
+
+
+
+
 
         #now lets add a modified version of the get_indices_array function, but it does its work inside the for
         # loop in which we can ask it if it has satisfied its condition at each iteration
@@ -50,9 +59,11 @@ def get_indices_array(storage_array, desired_accuracy_threshold, offset):
     print(locations)
     return locations + offset
 
-tmon = scq.Transmon(EJ=10, EC=1, ng=0, ncut=50)
+tmon = scq.Transmon(EJ=1500, EC=1, ng=0, ncut=100)
 
-result = get_accuracy_values(tmon, 50)
+result = get_accuracy_values(tmon, 100, 100)
+print(result)
+
 
 
 
