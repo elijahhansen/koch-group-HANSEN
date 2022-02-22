@@ -7,7 +7,7 @@ import scqubits as scq
 # for each ncut
 #then must use those reference eigenvals in each element to have accuracy values (error) for each approximation
 #then must find each element that is below the desired accuracy threshold and put them into an array
-def get_accuracy_values(tmon, max_ncut, levels_count, desired_accuracy_threshold = 1e-06):
+def get_required_ncut(tmon, max_ncut, levels_count, desired_accuracy_threshold = 1e-06):
     min_ncut= int(levels_count/2 -1)
     storage_array = np.empty(shape=(max_ncut,2*max_ncut+1))
     storage_array[:] = np.NaN
@@ -24,9 +24,17 @@ def get_accuracy_values(tmon, max_ncut, levels_count, desired_accuracy_threshold
         if (accuracy_values[row_index, 0:levels_count-1] < threshold_array[0:levels_count-1]).all():
             return my_ncut
 
+tmon = scq.Transmon(EJ=10, EC=1, ng=0, ncut=100)
 
+result = get_required_ncut(tmon, 100, 100)
+print(result)
 
-
+        ####TODO#####
+        # debug and manually inspect code line by line accuracy values array for a sanity check of threshold values
+        #generalize code to work with other 1-dimensional systems (fluxonium) and 0 pi
+        # can give a condition based on whether user gives transmon or fluxonium
+        #try to get values for a plot
+        #explore floxonium
 
 
         #now lets add a modified version of the get_indices_array function, but it does its work inside the for
@@ -46,23 +54,7 @@ def get_accuracy_values(tmon, max_ncut, levels_count, desired_accuracy_threshold
     # this means calculating accuracy values and chopping off the useless NaNs we dont need
 
 
-def get_indices_array(storage_array, desired_accuracy_threshold, offset):
-    # energy_level starts at 0 (ground state)
-    # reference_evals = get_reference_evals(user_ej,user_ec,user_ng,reference_ncut,levels_count)
-    # approx_evals = get_approx_evals(min_range,max_range,energy_level_count)
-    #accuracy_values = get_accuracy_values(approx_evals, reference_evals)
-    column_count = storage_array.shape[1]
-    locations = np.empty(column_count)
-    for i, column in enumerate(storage_array.T):
-        column_locations = np.argwhere(column < desired_accuracy_threshold).flatten()
-        locations[i] = column_locations[0]
-    print(locations)
-    return locations + offset
 
-tmon = scq.Transmon(EJ=1500, EC=1, ng=0, ncut=100)
-
-result = get_accuracy_values(tmon, 100, 100)
-print(result)
 
 
 
