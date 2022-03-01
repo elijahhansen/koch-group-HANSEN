@@ -7,7 +7,7 @@ import scqubits as scq
 # for each ncut
 #then must use those reference eigenvals in each element to have accuracy values (error) for each approximation
 #then must find each element that is below the desired accuracy threshold and put them into an array
-def get_required_ncut(tmon, max_ncut, levels_count, desired_accuracy_threshold = 1e-06):
+def get_required_ncut(tmon, max_ncut, levels_count, desired_accuracy_threshold = 1e-06): #for example here it could be 6 significant digits)
     min_ncut= int(levels_count/2 -1)
     storage_array = np.empty(shape=(max_ncut,2*max_ncut+1))
     storage_array[:] = np.NaN
@@ -24,17 +24,20 @@ def get_required_ncut(tmon, max_ncut, levels_count, desired_accuracy_threshold =
         if (accuracy_values[row_index, 0:levels_count-1] < threshold_array[0:levels_count-1]).all():
             return my_ncut
 
-tmon = scq.Transmon(EJ=10, EC=1, ng=0, ncut=100)
+tmon = scq.Transmon(EJ=10, EC=1, ng=0, ncut=50)
 
-result = get_required_ncut(tmon, 100, 100)
-print(result)
+result = get_required_ncut(tmon, 50, 20)
+
 
         ####TODO#####
+        #reformat code to find number of significant digits instead of relative accuracy valuesm - will need to reformat eigen-energies and find appropriate number
+        # of significant digits
         # debug and manually inspect code line by line accuracy values array for a sanity check of threshold values
-        #generalize code to work with other 1-dimensional systems (fluxonium) and 0 pi
+        # generalize code to work with other 1-dimensional systems (fluxonium) and 0 pi
         # can give a condition based on whether user gives transmon or fluxonium
-        #try to get values for a plot
-        #explore floxonium
+        # try to get values for a plot
+        # explore floxonium
+        # explore integration with tunable transmon
 
 
         #now lets add a modified version of the get_indices_array function, but it does its work inside the for
@@ -52,11 +55,13 @@ print(result)
 
     # lets try to condense these two for loops so that we can calculate accuracy values on the fly
     # this means calculating accuracy values and chopping off the useless NaNs we dont need
+    #
 
 
 
 
 
+#this is a transmon hamiltonian with three levels truncated to ncut=10
 
 
 
