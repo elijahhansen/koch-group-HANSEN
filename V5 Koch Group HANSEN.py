@@ -7,16 +7,23 @@ import scqubits as scq
 # for each ncut
 #then must use those reference eigenvals in each element to have accuracy values (error) for each approximation
 #then must find each element that is below the desired accuracy threshold and put them into an array
+def float_helper(values, q):
+    px = np.ceil(np.log(values))
+    ix = values * 10 ** (-px + q)
+    return ix
+
 def get_required_ncut(tmon, max_ncut, levels_count, desired_accuracy_threshold = 1e-06): #for example here it could be 6 significant digits)
     min_ncut= int(levels_count/2 -1)
     storage_array = np.empty(shape=(max_ncut,2*max_ncut+1))
+    mod_array = np.empty(shape=(max_ncut, 2 * max_ncut + 1))
     storage_array[:] = np.NaN
-    ref = tmon.eigenvals(evals_count= 2*max_ncut+1)
+    ref = float_helper(tmon.eigenvals(evals_count= levels_count))
+    ## we want to format the ref and approx values into strings, divide by the exponent in sci notation.
     accuracy_values = np.zeros_like(storage_array)
     for row_index, my_ncut in enumerate(range(min_ncut,max_ncut)):
         tmon.ncut = my_ncut
-        approx_value = tmon.eigenvals(evals_count=2 * my_ncut + 1)
-        storage_array[row_index, 0:2*my_ncut+1] = approx_value
+        approx_value = float_helper(tmon.eigenvals(evals_count=levels_count))
+        ##storage_array[row_index, 0:2*my_ncut+1] = approx_value
         relative_deviation_table = (approx_value-ref[0:2*my_ncut+1]) / ref[0:2*my_ncut+1]
 
         accuracy_values[row_index, 0:2*my_ncut+1] = np.abs(relative_deviation_table)
@@ -24,9 +31,11 @@ def get_required_ncut(tmon, max_ncut, levels_count, desired_accuracy_threshold =
         if (accuracy_values[row_index, 0:levels_count-1] < threshold_array[0:levels_count-1]).all():
             return my_ncut
 
+
 tmon = scq.Transmon(EJ=10, EC=1, ng=0, ncut=50)
 
-result = get_required_ncut(tmon, 50, 20)
+result = get_required_ncut(tmon, 50, 22)
+print(result)
 
 
         ####TODO#####
