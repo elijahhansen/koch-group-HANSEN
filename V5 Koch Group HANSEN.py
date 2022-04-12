@@ -12,29 +12,23 @@ def float_helper(values, q):
     ix = values * 10 ** (-px + q)
     return ix
 
-def get_required_ncut(tmon, max_ncut, levels_count, desired_accuracy_threshold = 1e-06): #for example here it could be 6 significant digits)
-    min_ncut= int(levels_count/2 -1)
-    storage_array = np.empty(shape=(max_ncut,2*max_ncut+1))
-    mod_array = np.empty(shape=(max_ncut, 2 * max_ncut + 1))
-    storage_array[:] = np.NaN
-    ref = float_helper(tmon.eigenvals(evals_count= levels_count))
+def get_required_ncut(tmon, max_ncut, levels_count): #for example here it could be 6 significant digits)
+    min_ncut = int(levels_count/2 - 1)
+    ##storage_array = np.empty(shape=(max_ncut, 2*max_ncut+1))
+    ##storage_array[:] = np.NaN
+    ref = float_helper(tmon.eigenvals(evals_count=levels_count), 6)
     ## we want to format the ref and approx values into strings, divide by the exponent in sci notation.
-    accuracy_values = np.zeros_like(storage_array)
-    for row_index, my_ncut in enumerate(range(min_ncut,max_ncut)):
+    ##accuracy_values = np.zeros_like(storage_array)
+    for row_index, my_ncut in enumerate(range(min_ncut, max_ncut)):
         tmon.ncut = my_ncut
-        approx_value = float_helper(tmon.eigenvals(evals_count=levels_count))
-        ##storage_array[row_index, 0:2*my_ncut+1] = approx_value
-        relative_deviation_table = (approx_value-ref[0:2*my_ncut+1]) / ref[0:2*my_ncut+1]
-
-        accuracy_values[row_index, 0:2*my_ncut+1] = np.abs(relative_deviation_table)
-        threshold_array = np.ones(levels_count)*desired_accuracy_threshold
-        if (accuracy_values[row_index, 0:levels_count-1] < threshold_array[0:levels_count-1]).all():
+        approx_value = float_helper(tmon.eigenvals(evals_count=levels_count), 6)
+        if ref == approx_value:
             return my_ncut
 
 
-tmon = scq.Transmon(EJ=10, EC=1, ng=0, ncut=50)
+tmon = scq.Transmon(EJ=100, EC=1, ng=0, ncut=50)
 
-result = get_required_ncut(tmon, 50, 22)
+result = get_required_ncut(tmon, 50, 3)
 print(result)
 
 
