@@ -8,12 +8,12 @@ import scqubits as scq
 #then must use those reference eigenvals in each element to have accuracy values (error) for each approximation
 #then must find each element that is below the desired accuracy threshold and put them into an array
 def float_helper(values, q):
-    px = np.ceil(np.log(values))
-    ix = values * 10 ** (-px + q)
+    px = np.ceil(np.log10(abs(values)))
+    ix = (values * 10 ** (-px + q)).astype(int)
     return ix
 
 def get_required_ncut(tmon, max_ncut, levels_count): #for example here it could be 6 significant digits)
-    min_ncut = int(levels_count/2 - 1)
+    min_ncut = int(np.ceil((levels_count-1)/2))
     ##storage_array = np.empty(shape=(max_ncut, 2*max_ncut+1))
     ##storage_array[:] = np.NaN
     ref = float_helper(tmon.eigenvals(evals_count=levels_count), 6)
@@ -22,13 +22,13 @@ def get_required_ncut(tmon, max_ncut, levels_count): #for example here it could 
     for row_index, my_ncut in enumerate(range(min_ncut, max_ncut)):
         tmon.ncut = my_ncut
         approx_value = float_helper(tmon.eigenvals(evals_count=levels_count), 6)
-        if ref == approx_value:
+        if np.array_equal(ref,approx_value):
             return my_ncut
 
 
 tmon = scq.Transmon(EJ=100, EC=1, ng=0, ncut=50)
 
-result = get_required_ncut(tmon, 50, 3)
+result = get_required_ncut(tmon, 50, 10)
 print(result)
 
 
